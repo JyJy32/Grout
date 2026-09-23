@@ -18,6 +18,7 @@ Window {
         width: parent.width
         placeholderText: "search ..."
         focus: true
+        Keys.onEscapePressed: root.setVisible(false)
         onTextChanged: {
             searchModel.setFilterFixedString(text);
             resultsPopup.open();
@@ -65,60 +66,51 @@ Window {
         }
     }
 
-    GridView {
+    GridLayout {
+        id: pinnedGrid
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.topMargin: 60
         anchors.margins: 20
-        cellWidth: 160
-        cellHeight: 160
-        Keys.onEscapePressed: root.setVisible(false)
-        model: ListModel {
-            ListElement {
-                name: "Firefox"
-                color: "#e66000"
-            }
-            ListElement {
-                name: "Terminal"
+        anchors.topMargin: 60
+        columns: 4
+        rowSpacing: 8
+        columnSpacing: 8
+
+        Repeater {
+            model: pinnedTiles
+            delegate: Rectangle {
+                required property string name
+                required property int colSpan
+                required property int rowSpan
+
+                Layout.columnSpan: colSpan
+                Layout.rowSpan: rowSpan
+                Layout.preferredWidth: 150 * colSpan + 8 * (colSpan - 1)
+                Layout.preferredHeight: 150 * rowSpan + 8 * (rowSpan - 1)
+
                 color: "#2d2d2d"
-            }
-            ListElement {
-                name: "Files"
-                color: "#3a7bd5"
-            }
-            ListElement {
-                name: "Vim"
-                color: "#019833"
-            }
-        }
-        delegate: Rectangle {
-            width: 150
-            height: 150
-            color: model.color
-            radius: 4
+                radius: 4
 
-            Text {
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.margins: 10
-                text: model.name
-                color: "white"
-                font.pixelSize: 16
-            }
+                Text {
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.margins: 10
+                    text: name
+                    color: "white"
+                    font.pixelSize: 16
+                }
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: console.log("launch:", model.name)
-                // slight press-scale feedback, cheap and makes it feel alive
-                onPressed: parent.scale = 0.96
-                onReleased: parent.scale = 1.0
-            }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: console.log("launch:", exec)
+                    onPressed: parent.scale = 0.96
+                    onReleased: parent.scale = 1.0
+                }
 
-            Behavior on scale {
-                NumberAnimation {
-                    duration: 80
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: 80
+                    }
                 }
             }
         }
