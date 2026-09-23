@@ -10,6 +10,7 @@ Rectangle {
     radius: 4
 
     Text {
+        id: tileName
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.margins: 10
@@ -17,8 +18,31 @@ Rectangle {
         wrapMode: Text.WordWrap
         text: name
         color: "white"
-        font.pixelSize: 16
+        font.pixelSize: 20
     }
+
+    Image {
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        source: "image://icons/" + payload.icon
+    }
+
+    states: [
+        State {
+            name: "small"
+            when: colSpan === 1 && rowSpan === 1
+            PropertyChanges {
+                tileName.font.pixelSize: 20
+            }
+        },
+        State {
+            name: "big"
+            when: colSpan === 2 && rowSpan === 2
+            PropertyChanges {
+                tileName.font.pixelSize: 36
+            }
+        }
+    ]
 
     MouseArea {
         anchors.fill: parent

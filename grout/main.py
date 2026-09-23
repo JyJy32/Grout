@@ -10,18 +10,17 @@ from grout import launcher
 from grout.apps import get_desktop_entries
 from grout.config import load_tiles, save_tiles
 from grout.daemon import ToggleServer
+from grout.iconprovider import IconProvider
 from grout.models import AppListModel, TileListModel, WidgetListModel
 from grout.launcher import Launcher
 from grout.widgets import discover_widgets
 
-# TODO: 
-# -[] widget discovery
-# -[] xdg themes
-
-
 def main():
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
+
+    icon_provider = IconProvider()
+    engine.addImageProvider("icons", icon_provider)
 
     launcher = Launcher()
     engine.rootContext().setContextProperty("launcher", launcher)
@@ -44,7 +43,6 @@ def main():
     engine.rootContext().setContextProperty("addTileSearchModel", add_tile_proxy)
 
     widgets_registry = discover_widgets()
-    print("widgets_registry:", widgets_registry)
 
     widget_list = WidgetListModel(widgets_registry)
     add_widget_proxy = QSortFilterProxyModel()
