@@ -10,8 +10,64 @@ Window {
     color: "#1e1e1e"
     title: "grout"
 
+    TextField {
+        id: searchField
+        width: parent.width
+        placeholderText: "search ..."
+        focus: true
+        onTextChanged: {
+            searchModel.setFilterFixedString(text);
+            resultsPopup.open();
+            if (text.length === 0)
+                resultsPopup.close();
+        }
+    }
+
+    Popup {
+        id: resultsPopup
+        y: searchField.height + 4
+        width: searchField.width
+        height: Math.min(resultsList.implicitHeight, 300)
+        padding: 0
+        closePolicy: Popup.NoAutoClose
+
+        background: Rectangle {
+            color: "#2d2d2d"
+            radius: 4
+            border.color: "#3a3a3a"
+        }
+
+        ListView {
+            id: resultsList
+            anchors.fill: parent
+            model: searchModel
+            clip: true
+            implicitHeight: Math.min(contentHeight, 300)
+            delegate: Rectangle {
+                width: resultsList.width
+                height: 44
+                color: ListView.isCurrentItem ? "#3a3a3a" : "transparent"
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.margins: 12
+                    text: name
+                    color: "white"
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: console.log("launch: ", exec_)
+                }
+            }
+        }
+    }
+
     GridView {
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 60
         anchors.margins: 20
         cellWidth: 160
         cellHeight: 160
