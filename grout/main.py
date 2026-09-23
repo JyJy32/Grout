@@ -45,6 +45,18 @@ def main():
         }
         for a in apps[:6]
     ]
+    weather_widget_qml = QUrl.fromLocalFile(
+        str(Path(__file__).parent.parent / "widgets" / "weather" / "Widget.qml"))
+    weather_tile = {
+        "type": "widget",
+        "name": "Weather",
+        "colSpan": 1,
+        "rowSpan": 1,
+        "payload": {"latitude": 51.2194, "longitude": 4.4025},
+        "qmlSource": weather_widget_qml
+    }
+
+    pinned_tiles.append(weather_tile)
     pinned_model = TileListModel(pinned_tiles)
 
     engine.rootContext().setContextProperty("pinnedTiles", pinned_model)
