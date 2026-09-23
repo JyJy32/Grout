@@ -4,8 +4,11 @@ import QtQuick.Layouts 1.15
 
 Window {
     id: root
-    width: 900
-    height: 600
+    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+    width: Screen.width
+    height: Screen.height
+    x: 0
+    y: 0
     visible: true
     color: "#1e1e1e"
     title: "grout"
@@ -71,6 +74,7 @@ Window {
         anchors.margins: 20
         cellWidth: 160
         cellHeight: 160
+        Keys.onEscapePressed: root.setVisible(false)
         model: ListModel {
             ListElement {
                 name: "Firefox"

@@ -6,6 +6,7 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
 from grout.apps import get_desktop_entries
+from grout.daemon import ToggleServer
 from grout.models import AppListModel
 
 def main():
@@ -28,6 +29,21 @@ def main():
 
     if not engine.rootObjects():
         sys.exit(-1)
+
+    window = engine.rootObjects()[0]
+    window.setVisible(False)
+
+    server: ToggleServer = ToggleServer()
+
+    def handle_toggle():
+        if window.isVisible():
+            window.setVisible(False)
+        else:
+            window.setVisible(True)
+            window.requestActivate()
+            window.raise_()
+
+    server.toggle_requested.connect(handle_toggle)
 
     sys.exit(app.exec())
 
