@@ -4,6 +4,8 @@ Rectangle {
     id: weatherRoot
     property string name
     property var payload: ({})
+    property int colSpan
+    property int rowSpan
 
     property real latitude: payload.latitude !== undefined ? payload.latitude : 51.2194
     property real longitude: payload.longitude !== undefined ? payload.longitude : 4.4025

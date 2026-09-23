@@ -1,7 +1,7 @@
 import typing
 
 import PySide6.QtCore
-from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, Qt, QObject
+from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, QUrl, Qt, QObject, Slot
 
 
 class AppListModel(QAbstractListModel):
@@ -25,7 +25,7 @@ class AppListModel(QAbstractListModel):
         if role == self.ExecRole:
             return app["exec"]
         if role == self.IconRole:
-            return app["Icon"]
+            return app["icon"]
         if role == self.CommentRole:
             return app["comment"]
 
@@ -47,9 +47,29 @@ class TileListModel(QAbstractListModel):
     PayloadRole = Qt.ItemDataRole.UserRole + 5
     QmlSourceRole = Qt.ItemDataRole.UserRole + 6
 
-    def __init__(self, tiles, parent: PySide6.QtCore.QObject | None = None) -> None:
+    def __init__(self, tiles, app_tile_qml, widgets_registry, on_change=None, parent: PySide6.QtCore.QObject | None = None) -> None:
         super().__init__(parent)
-        self._tiles = tiles
+        self._app_tile_qml = app_tile_qml
+        self._widgets_registry = widgets_registry  # {widget_name: Path to Widget.qml}
+        self._on_change = on_change
+        self._tiles = [self._resolve(t) for t in tiles]
+
+    def _resolve(self, tile: dict) -> dict:
+        """attach a runtime qmlSource to a persisted tile dict."""
+        resolved = dict(tile)
+        if resolved["type"] == "app":
+            resolved["qmlSource"] = self._app_tile_qml
+        else:
+            widget_path = self._widgets_registry.get(resolved.get("widget"))
+            if widget_path is None:
+                resolved["qmlSource"] = QUrl()
+            else:
+                resolved["qmlSource"] = QUrl.fromLocalFile(str(widget_path))
+        return resolved
+
+    def _notify_change(self):
+        if self._on_change:
+            self._on_change(self.serialize())
 
     def rowCount(self, /, parent: PySide6.QtCore.QModelIndex | PySide6.QtCore.QPersistentModelIndex = QModelIndex()) -> int:
         return len(self._tiles)
@@ -81,3 +101,44 @@ class TileListModel(QAbstractListModel):
             self.PayloadRole: QByteArray(b"payload"),
             self.QmlSourceRole: QByteArray(b"qmlSource"),
         }
+
+    def serialize(self):
+        """ JSON-safe snapshot, drops the qmlSource field"""
+        return [{k: v for k, v in t.items() if k != "qmlSource"} for t in self._tiles]
+
+    @Slot(int, int, int)
+    def resizeTile(self, row: int, colSpan: int, rowSpan: int):
+        if not (0 <= row < len(self._tiles)):
+            return
+        self._tiles[row]["colSpan"] = colSpan
+        self._tiles[row]["rowSpan"] = rowSpan
+
+        idx = self.index(row, 0)
+        self.dataChanged.emit(idx, idx, [self.ColSpanRole, self.RowSpanRole])
+        self._notify_change()
+
+    @Slot(int)
+    def removeTile(self, row: int):
+        if not (0 <= row < len(self._tiles)):
+            return
+        self.beginRemoveRows(QModelIndex(), row, row)
+        del self._tiles[row]
+        self.endRemoveRows()
+        self._notify_change()
+
+    @Slot('QVariant')
+    def addAppTile(self, app):
+        if hasattr(app, "toVariant"):
+            app = app.toVariant()
+        tile = self._resolve({
+            "type": "app",
+            "name": app["name"],
+            "colSpan": 1,
+            "rowSpan": 1,
+            "payload": {"exec": app["exec"], "icon": app.get("icon", "")},
+        })
+        row = len(self._tiles)
+        self.beginInsertRows(QModelIndex(), row, row)
+        self._tiles.append(tile)
+        self.endInsertRows()
+        self._notify_change()

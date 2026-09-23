@@ -8,9 +8,15 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from grout import launcher
 from grout.apps import get_desktop_entries
+from grout.config import load_tiles, save_tiles
 from grout.daemon import ToggleServer
 from grout.models import AppListModel, TileListModel
 from grout.launcher import Launcher
+from grout.widgets import discover_widgets
+
+# TODO: 
+# -[] widget discovery
+# -[] xdg themes
 
 
 def main():
@@ -28,13 +34,21 @@ def main():
     proxy.setFilterRole(AppListModel.NameRole)
     proxy.setFilterCaseSensitivity(Qt.CaseSensitivity(False))
     proxy.setDynamicSortFilter(True)
-
     engine.rootContext().setContextProperty("searchModel", proxy)
+
+    add_tile_proxy = QSortFilterProxyModel()
+    add_tile_proxy.setSourceModel(app_model)
+    add_tile_proxy.setFilterRole(AppListModel.NameRole)
+    add_tile_proxy.setFilterCaseSensitivity(Qt.CaseSensitivity(False))
+    add_tile_proxy.setDynamicSortFilter(True)
+    engine.rootContext().setContextProperty("addTileSearchModel", add_tile_proxy)
+
+    widgets_registry = discover_widgets()
 
     app_tile_qml = QUrl.fromLocalFile(
         str(Path(__file__).parent / "qml" / "tiles" / "AppTile.qml")
     )
-    pinned_tiles = [
+    default_tiles = [
         {
             "type": "app",
             "name": a["name"],
@@ -56,8 +70,9 @@ def main():
         "qmlSource": weather_widget_qml
     }
 
-    pinned_tiles.append(weather_tile)
-    pinned_model = TileListModel(pinned_tiles)
+    default_tiles.append(weather_tile)
+    pinned_tiles = load_tiles(default_tiles)
+    pinned_model = TileListModel(pinned_tiles, app_tile_qml=app_tile_qml, widgets_registry=widgets_registry, on_change=save_tiles)
 
     engine.rootContext().setContextProperty("pinnedTiles", pinned_model)
 

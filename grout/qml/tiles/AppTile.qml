@@ -3,6 +3,8 @@ import QtQuick 2.15
 Rectangle {
     property string name
     property var payload
+    property int colSpan
+    property int rowSpan
 
     color: "#2d2d2d"
     radius: 4

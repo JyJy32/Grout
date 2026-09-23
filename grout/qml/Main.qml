@@ -66,6 +66,101 @@ Window {
         }
     }
 
+    Rectangle {
+        id: gridBackground
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 60
+        color: "transparent"
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: emptySpaceMenu.popup()
+        }
+
+        Menu {
+            id: emptySpaceMenu
+
+            MenuItem {
+                text: "Add tile"
+                onTriggered: {
+                    addTileSearchField.text = "";
+                    addTilePopup.open();
+                    addTileSearchField.forceActiveFocus();
+                }
+            }
+        }
+    }
+
+    Popup {
+        id: addTilePopup
+        anchors.centerIn: parent
+        width: 400
+        height: 360
+        modal: true
+        focus: true
+        padding: 12
+
+        background: Rectangle {
+            color: "#2d2d2d"
+            radius: 6
+            border.color: "#3a3a3a"
+        }
+
+        Column {
+            anchors.fill: parent
+            spacing: 8
+
+            TextField {
+                id: addTileSearchField
+                width: parent.width
+                placeholderText: "Search apps to add..."
+                onTextChanged: addTileSearchModel.setFilterFixedString(text)
+                Keys.onEscapePressed: addTilePopup.close()
+            }
+
+            ListView {
+                width: parent.width
+                height: parent.height - 40
+                clip: true
+                model: addTileSearchModel
+                delegate: Rectangle {
+                    id: addDelegateRoot
+                    required property string name
+                    required property string exec_
+                    required property string icon
+
+                    width: parent ? parent.width : 0
+                    height: 40
+                    color: "transparent"
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.margins: 8
+                        text: addDelegateRoot.name
+                        color: "white"
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            pinnedTiles.addAppTile({
+                                "name": addDelegateRoot.name,
+                                "exec": addDelegateRoot.exec_,
+                                "icon": addDelegateRoot.icon
+                            });
+                            addTilePopup.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     GridLayout {
         id: pinnedGrid
         anchors.top: parent.top
@@ -80,6 +175,7 @@ Window {
             model: pinnedTiles
             delegate: Item {
                 id: tileRoot
+                required property int index
                 required property string name
                 required property int colSpan
                 required property int rowSpan
@@ -98,8 +194,39 @@ Window {
                     Component.onCompleted: {
                         setSource(tileRoot.qmlSource, {
                             "name": tileRoot.name,
-                            "payload": tileRoot.payload
+                            "payload": tileRoot.payload,
+                            "colSpan": tileRoot.colSpan,
+                            "rowSpan": tileRoot.rowSpan
                         });
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.RightButton
+                    onClicked: tileMenu.popup()
+                }
+
+                Menu {
+                    id: tileMenu
+                    MenuItem {
+                        text: "Resize"
+                        onTriggered: {
+                            var shapes = [[1, 1], [2, 1], [1, 2], [2, 2]];
+                            var cur = 0;
+                            for (var i = 0; i < shapes.length; i++) {
+                                if (shapes[i][0] === tileRoot.colSpan && shapes[i][1] === tileRoot.rowSpan) {
+                                    cur = i;
+                                    break;
+                                }
+                            }
+                            var next = shapes[(cur + 1) % shapes.length];
+                            pinnedTiles.resizeTile(tileRoot.index, next[0], next[1]);
+                        }
+                    }
+                    MenuItem {
+                        text: "Remove"
+                        onTriggered: pinnedTiles.removeTile(tileRoot.index)
                     }
                 }
             }
