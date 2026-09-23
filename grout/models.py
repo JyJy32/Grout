@@ -1,3 +1,4 @@
+from pathlib import Path
 import typing
 
 import PySide6.QtCore
@@ -126,7 +127,7 @@ class TileListModel(QAbstractListModel):
         self.endRemoveRows()
         self._notify_change()
 
-    @Slot('QVariant')
+    @Slot("QVariant")
     def addAppTile(self, app):
         if hasattr(app, "toVariant"):
             app = app.toVariant()
@@ -142,3 +143,47 @@ class TileListModel(QAbstractListModel):
         self._tiles.append(tile)
         self.endInsertRows()
         self._notify_change()
+
+    @Slot("QVariant")
+    def addWidgetTile(self, widget):
+        if hasattr(widget, "toVariant"):
+            widget = widget.toVariant()
+        tile = self._resolve({
+            "type": "widget",
+            "name": widget["name"],
+            "colSpan": 1,
+            "rowSpan": 1,
+            "payload": {}
+        })
+        row = len(self._tiles)
+        self.beginInsertRows(QModelIndex(), row, row)
+        self._tiles.append(tile)
+        self.endInsertRows()
+        self._notify_change()
+
+class WidgetListModel(QAbstractListModel):
+    NameRole = Qt.ItemDataRole.UserRole + 1
+    PathRole = Qt.ItemDataRole.UserRole + 2
+
+    def __init__(self, widgets: dict[str, Path], parent: PySide6.QtCore.QObject | None = None) -> None:
+        super().__init__(parent)
+        self._widgets = [{"name": wk, "path": str(wp)} for (wk, wp) in widgets.items()]
+
+    def rowCount(self, /, parent: PySide6.QtCore.QModelIndex | PySide6.QtCore.QPersistentModelIndex = QModelIndex()) -> int:
+        return len(self._widgets)
+
+    def data(self, index: PySide6.QtCore.QModelIndex | PySide6.QtCore.QPersistentModelIndex, /, role: int = 0) -> typing.Any:
+        if not index.isValid():
+            return None
+        widget = self._widgets[index.row()]
+        if role == self.NameRole:
+            return widget["name"]
+        elif role == self.PathRole:
+            return widget["path"]
+
+    def roleNames(self, /) -> typing.Dict[int, PySide6.QtCore.QByteArray]:
+        return {
+            self.NameRole: QByteArray(b"name"),
+            self.PathRole: QByteArray(b"role"),
+        }
+

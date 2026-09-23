@@ -15,7 +15,7 @@ Rectangle {
     property bool loading: true
     property string errorText: ""
 
-    color: "#2d2d2d"
+    color: "#00002d"
 
     function fetchWeather() {
         console.log("fetching weather");
@@ -44,6 +44,7 @@ Rectangle {
         xhr.open("GET", url);
         xhr.send();
     }
+
     Timer {
         interval: weatherRoot.refreshIntervalMs
         running: true

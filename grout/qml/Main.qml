@@ -92,6 +92,15 @@ Window {
                     addTileSearchField.forceActiveFocus();
                 }
             }
+
+            MenuItem {
+                text: "Add Widget"
+                onTriggered: {
+                    addWidgetSearchField.text = "";
+                    addWidgetPopup.open();
+                    addWidgetSearchField.forceActiveFocus();
+                }
+            }
         }
     }
 
@@ -152,6 +161,68 @@ Window {
                                 "name": addDelegateRoot.name,
                                 "exec": addDelegateRoot.exec_,
                                 "icon": addDelegateRoot.icon
+                            });
+                            addTilePopup.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Popup {
+        id: addWidgetPopup
+        anchors.centerIn: parent
+        width: 400
+        height: 360
+        modal: true
+        focus: true
+        padding: 12
+
+        background: Rectangle {
+            color: "#2d2d2d"
+            radius: 6
+            border.color: "#3a3a3a"
+        }
+
+        Column {
+            anchors.fill: parent
+            spacing: 8
+
+            TextField {
+                id: addWidgetSearchField
+                width: parent.width
+                placeholderText: "Search apps to add..."
+                onTextChanged: addTileSearchModel.setFilterFixedString(text)
+                Keys.onEscapePressed: addTilePopup.close()
+            }
+
+            ListView {
+                width: parent.width
+                height: parent.height - 40
+                clip: true
+                model: addWidgetSearchModel
+                delegate: Rectangle {
+                    id: addWDelegateRoot
+                    required property string name
+
+                    width: parent ? parent.width : 0
+                    height: 40
+                    color: "transparent"
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.margins: 8
+                        text: addWDelegateRoot.name
+                        color: "white"
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            pinnedTiles.addWidgetTile({
+                                "name": addWDelegateRoot.name
                             });
                             addTilePopup.close();
                         }

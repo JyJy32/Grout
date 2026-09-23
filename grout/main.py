@@ -10,7 +10,7 @@ from grout import launcher
 from grout.apps import get_desktop_entries
 from grout.config import load_tiles, save_tiles
 from grout.daemon import ToggleServer
-from grout.models import AppListModel, TileListModel
+from grout.models import AppListModel, TileListModel, WidgetListModel
 from grout.launcher import Launcher
 from grout.widgets import discover_widgets
 
@@ -44,6 +44,14 @@ def main():
     engine.rootContext().setContextProperty("addTileSearchModel", add_tile_proxy)
 
     widgets_registry = discover_widgets()
+
+    widget_list = WidgetListModel(widgets_registry)
+    add_widget_proxy = QSortFilterProxyModel()
+    add_widget_proxy.setSourceModel(widget_list)
+    add_widget_proxy.setFilterRole(WidgetListModel.NameRole)
+    add_widget_proxy.setFilterCaseSensitivity(Qt.CaseSensitivity(False))
+    add_widget_proxy.setDynamicSortFilter(True)
+    engine.rootContext().setContextProperty("addWidgetSearchModel", add_widget_proxy)
 
     app_tile_qml = QUrl.fromLocalFile(
         str(Path(__file__).parent / "qml" / "tiles" / "AppTile.qml")
