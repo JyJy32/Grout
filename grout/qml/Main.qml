@@ -78,38 +78,28 @@ Window {
 
         Repeater {
             model: pinnedTiles
-            delegate: Rectangle {
+            delegate: Item {
+                id: tileRoot
                 required property string name
                 required property int colSpan
                 required property int rowSpan
+                required property var payload
+                required property url qmlSource
 
                 Layout.columnSpan: colSpan
                 Layout.rowSpan: rowSpan
                 Layout.preferredWidth: 150 * colSpan + 8 * (colSpan - 1)
                 Layout.preferredHeight: 150 * rowSpan + 8 * (rowSpan - 1)
 
-                color: "#2d2d2d"
-                radius: 4
-
-                Text {
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.margins: 10
-                    text: name
-                    color: "white"
-                    font.pixelSize: 16
-                }
-
-                MouseArea {
+                Loader {
                     anchors.fill: parent
-                    onClicked: console.log("launch:", exec)
-                    onPressed: parent.scale = 0.96
-                    onReleased: parent.scale = 1.0
-                }
-
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: 80
+                    onStatusChanged: if (status === Loader.Error)
+                        console.log("Loader error:", sourceComponent)
+                    Component.onCompleted: {
+                        setSource(tileRoot.qmlSource, {
+                            "name": tileRoot.name,
+                            "payload": tileRoot.payload
+                        });
                     }
                 }
             }
