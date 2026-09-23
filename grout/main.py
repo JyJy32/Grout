@@ -44,6 +44,7 @@ def main():
     engine.rootContext().setContextProperty("addTileSearchModel", add_tile_proxy)
 
     widgets_registry = discover_widgets()
+    print("widgets_registry:", widgets_registry)
 
     widget_list = WidgetListModel(widgets_registry)
     add_widget_proxy = QSortFilterProxyModel()
@@ -67,18 +68,7 @@ def main():
         }
         for a in apps[:6]
     ]
-    weather_widget_qml = QUrl.fromLocalFile(
-        str(Path(__file__).parent.parent / "widgets" / "weather" / "Widget.qml"))
-    weather_tile = {
-        "type": "widget",
-        "name": "Weather",
-        "colSpan": 1,
-        "rowSpan": 1,
-        "payload": {"latitude": 51.2194, "longitude": 4.4025},
-        "qmlSource": weather_widget_qml
-    }
 
-    default_tiles.append(weather_tile)
     pinned_tiles = load_tiles(default_tiles)
     pinned_model = TileListModel(pinned_tiles, app_tile_qml=app_tile_qml, widgets_registry=widgets_registry, on_change=save_tiles)
 

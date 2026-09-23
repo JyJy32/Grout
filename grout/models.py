@@ -61,8 +61,9 @@ class TileListModel(QAbstractListModel):
         if resolved["type"] == "app":
             resolved["qmlSource"] = self._app_tile_qml
         else:
-            widget_path = self._widgets_registry.get(resolved.get("widget"))
+            widget_path = self._widgets_registry.get(resolved.get("name"))
             if widget_path is None:
+                print(f"widget: {resolved.get('name')} no source found")
                 resolved["qmlSource"] = QUrl()
             else:
                 resolved["qmlSource"] = QUrl.fromLocalFile(str(widget_path))
