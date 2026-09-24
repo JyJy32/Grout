@@ -10,7 +10,7 @@ Window {
     x: 0
     y: 0
     visible: true
-    color: "#1e1e1e"
+    color: palette.background
     title: "grout"
 
     ColumnLayout {
@@ -28,7 +28,7 @@ Window {
 
                 Text {
                     id: clockText
-                    color: "white"
+                    color: palette.text
                     font.pixelSize: 20
                     text: Qt.formatTime(new Date(), "hh:mm")
 
@@ -58,7 +58,7 @@ Window {
                     Layout.preferredWidth: 36
                     Layout.preferredHeight: 36
                     radius: 18
-                    color: "#2d2d2d"
+                    color: palette.surface
                     Text {
                         anchors.centerIn: parent
                         text: "👤"
@@ -86,7 +86,7 @@ Window {
                     Layout.preferredWidth: 36
                     Layout.preferredHeight: 36
                     radius: 18
-                    color: "#2d2d2d"
+                    color: palette.surface
                     Text {
                         anchors.centerIn: parent
                         text: "⚙"
@@ -109,9 +109,9 @@ Window {
                     closePolicy: Popup.NoAutoClose
 
                     background: Rectangle {
-                        color: "#2d2d2d"
+                        color: palette.surface
                         radius: 4
-                        border.color: "#3a3a3a"
+                        border.color: palette.surfaceBorder
                     }
 
                     ListView {
@@ -123,13 +123,13 @@ Window {
                         delegate: Rectangle {
                             width: resultsList.width
                             height: 44
-                            color: ListView.isCurrentItem ? "#3a3a3a" : "transparent"
+                            color: ListView.isCurrentItem ? palette.surfaceBorder : "transparent"
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.left: parent.left
                                 anchors.margins: 12
                                 text: name
-                                color: "white"
+                                color: palette.text
                             }
                             MouseArea {
                                 anchors.fill: parent
@@ -193,9 +193,9 @@ Window {
                 padding: 12
 
                 background: Rectangle {
-                    color: "#2d2d2d"
+                    color: palette.surface
                     radius: 6
-                    border.color: "#3a3a3a"
+                    border.color: palette.surfaceBorder
                 }
 
                 Column {
@@ -230,7 +230,7 @@ Window {
                                 anchors.left: parent.left
                                 anchors.margins: 8
                                 text: addDelegateRoot.name
-                                color: "white"
+                                color: palette.text
                             }
 
                             MouseArea {
@@ -259,9 +259,9 @@ Window {
                 padding: 12
 
                 background: Rectangle {
-                    color: "#2d2d2d"
+                    color: palette.surface
                     radius: 6
-                    border.color: "#3a3a3a"
+                    border.color: palette.surfaceBorder
                 }
 
                 Column {
@@ -294,7 +294,7 @@ Window {
                                 anchors.left: parent.left
                                 anchors.margins: 8
                                 text: addWDelegateRoot.name
-                                color: "white"
+                                color: palette.text
                             }
 
                             MouseArea {

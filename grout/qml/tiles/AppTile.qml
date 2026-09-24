@@ -6,7 +6,7 @@ Rectangle {
     property int colSpan
     property int rowSpan
 
-    color: "#2d2d2d"
+    color: palette.surface
     radius: 4
 
     Text {
@@ -17,7 +17,7 @@ Rectangle {
         width: parent.width - 20
         wrapMode: Text.WordWrap
         text: name
-        color: "white"
+        color: palette.text
         font.pixelSize: 20
     }
 

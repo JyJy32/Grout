@@ -6,19 +6,20 @@ from PySide6.QtCore import QSortFilterProxyModel, QUrl, Qt
 from PySide6.QtGui import QGuiApplication, QIcon, QWindow
 from PySide6.QtQml import QQmlApplicationEngine
 
-from grout import launcher
 from grout.apps import get_desktop_entries
-from grout.config import load_tiles, save_tiles
+from grout.config import load_config, load_tiles, save_tiles
 from grout.daemon import ToggleServer
 from grout.iconprovider import IconProvider, detect_icon_theme
 from grout.models import AppListModel, TileListModel, WidgetListModel
 from grout.launcher import Launcher
+from grout.palette import get_user_palette_path, load_palette
 from grout.system import SystemActions
 from grout.widgets import discover_widgets
 
 def main():
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
+    config = load_config()
 
     icon_provider = IconProvider()
     engine.addImageProvider("icons", icon_provider)
@@ -28,6 +29,10 @@ def main():
 
     system_actions = SystemActions()
     engine.rootContext().setContextProperty("systemActions", system_actions)
+
+    palette_path = get_user_palette_path(config)
+    palette = load_palette(palette_path)
+    engine.rootContext().setContextProperty("palette", palette)
 
     apps = get_desktop_entries()
     app_model = AppListModel(apps)
