@@ -13,291 +13,372 @@ Window {
     color: "#1e1e1e"
     title: "grout"
 
-    TextField {
-        id: searchField
-        width: parent.width
-        placeholderText: "search ..."
-        focus: true
-        Keys.onEscapePressed: root.setVisible(false)
-        onTextChanged: {
-            searchModel.setFilterFixedString(text);
-            resultsPopup.open();
-            if (text.length === 0)
-                resultsPopup.close();
-        }
-    }
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 0
+        // ---- header ----
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 60
 
-    Popup {
-        id: resultsPopup
-        y: searchField.height + 4
-        width: searchField.width
-        height: Math.min(resultsList.implicitHeight, 300)
-        padding: 0
-        closePolicy: Popup.NoAutoClose
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: 12
+                spacing: 16
 
-        background: Rectangle {
-            color: "#2d2d2d"
-            radius: 4
-            border.color: "#3a3a3a"
-        }
-
-        ListView {
-            id: resultsList
-            anchors.fill: parent
-            model: searchModel
-            clip: true
-            implicitHeight: Math.min(contentHeight, 300)
-            delegate: Rectangle {
-                width: resultsList.width
-                height: 44
-                color: ListView.isCurrentItem ? "#3a3a3a" : "transparent"
                 Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left
-                    anchors.margins: 12
-                    text: name
+                    id: clockText
                     color: "white"
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: console.log("launch: ", exec_)
-                }
-            }
-        }
-    }
+                    font.pixelSize: 20
+                    text: Qt.formatTime(new Date(), "hh:mm")
 
-    Rectangle {
-        id: gridBackground
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.topMargin: 60
-        color: "transparent"
-
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.RightButton
-            onClicked: emptySpaceMenu.popup()
-        }
-
-        Menu {
-            id: emptySpaceMenu
-
-            MenuItem {
-                text: "Add tile"
-                onTriggered: {
-                    addTileSearchField.text = "";
-                    addTilePopup.open();
-                    addTileSearchField.forceActiveFocus();
-                }
-            }
-
-            MenuItem {
-                text: "Add Widget"
-                onTriggered: {
-                    addWidgetSearchField.text = "";
-                    addWidgetPopup.open();
-                    addWidgetSearchField.forceActiveFocus();
-                }
-            }
-        }
-    }
-
-    Popup {
-        id: addTilePopup
-        anchors.centerIn: parent
-        width: 400
-        height: 360
-        modal: true
-        focus: true
-        padding: 12
-
-        background: Rectangle {
-            color: "#2d2d2d"
-            radius: 6
-            border.color: "#3a3a3a"
-        }
-
-        Column {
-            anchors.fill: parent
-            spacing: 8
-
-            TextField {
-                id: addTileSearchField
-                width: parent.width
-                placeholderText: "Search apps to add..."
-                onTextChanged: addTileSearchModel.setFilterFixedString(text)
-                Keys.onEscapePressed: addTilePopup.close()
-            }
-
-            ListView {
-                width: parent.width
-                height: parent.height - 40
-                clip: true
-                model: addTileSearchModel
-                delegate: Rectangle {
-                    id: addDelegateRoot
-                    required property string name
-                    required property string exec_
-                    required property string icon
-
-                    width: parent ? parent.width : 0
-                    height: 40
-                    color: "transparent"
-
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.margins: 8
-                        text: addDelegateRoot.name
-                        color: "white"
+                    Timer {
+                        interval: 1000
+                        running: true
+                        repeat: true
+                        onTriggered: clockText.text = Qt.formatTime(new Date(), "hh:mm")
                     }
+                }
 
+                TextField {
+                    id: searchField
+                    Layout.fillWidth: true
+                    placeholderText: "search ..."
+                    focus: true
+                    Keys.onEscapePressed: root.setVisible(false)
+                    onTextChanged: {
+                        searchModel.setFilterFixedString(text);
+                        resultsPopup.open();
+                        if (text.length === 0)
+                            resultsPopup.close();
+                    }
+                }
+
+                Rectangle {
+                    Layout.preferredWidth: 36
+                    Layout.preferredHeight: 36
+                    radius: 18
+                    color: "#2d2d2d"
+                    Text {
+                        anchors.centerIn: parent
+                        text: "👤"
+                        font.pixelSize: 18
+                    }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: {
-                            pinnedTiles.addAppTile({
-                                "name": addDelegateRoot.name,
-                                "exec": addDelegateRoot.exec_,
-                                "icon": addDelegateRoot.icon
-                            });
-                            addTilePopup.close();
+                        onClicked: accountMenu.popup()
+                    }
+
+                    Menu {
+                        id: accountMenu
+                        MenuItem {
+                            text: "Log out"
+                            onTriggered: systemActions.logout()
+                        }
+                        MenuItem {
+                            text: "Shut down"
+                            onTriggered: systemActions.shutdown()
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.preferredWidth: 36
+                    Layout.preferredHeight: 36
+                    radius: 18
+                    color: "#2d2d2d"
+                    Text {
+                        anchors.centerIn: parent
+                        text: "⚙"
+                        font.pixelSize: 18
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: console.log("settings clicked")
+                    }
+                }
+
+                Popup {
+                    id: resultsPopup
+                    parent: searchField
+                    x: 0
+                    y: searchField.height + 4
+                    width: searchField.width
+                    height: Math.min(resultsList.implicitHeight, 300)
+                    padding: 0
+                    closePolicy: Popup.NoAutoClose
+
+                    background: Rectangle {
+                        color: "#2d2d2d"
+                        radius: 4
+                        border.color: "#3a3a3a"
+                    }
+
+                    ListView {
+                        id: resultsList
+                        anchors.fill: parent
+                        model: searchModel
+                        clip: true
+                        implicitHeight: Math.min(contentHeight, 300)
+                        delegate: Rectangle {
+                            width: resultsList.width
+                            height: 44
+                            color: ListView.isCurrentItem ? "#3a3a3a" : "transparent"
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.margins: 12
+                                text: name
+                                color: "white"
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: console.log("launch: ", exec_)
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    Popup {
-        id: addWidgetPopup
-        anchors.centerIn: parent
-        width: 400
-        height: 360
-        modal: true
-        focus: true
-        padding: 12
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-        background: Rectangle {
-            color: "#2d2d2d"
-            radius: 6
-            border.color: "#3a3a3a"
-        }
-
-        Column {
-            anchors.fill: parent
-            spacing: 8
-
-            TextField {
-                id: addWidgetSearchField
-                width: parent.width
-                placeholderText: "Search apps to add..."
-                onTextChanged: addTileSearchModel.setFilterFixedString(text)
-                Keys.onEscapePressed: addTilePopup.close()
-            }
-
-            ListView {
-                width: parent.width
-                height: parent.height - 40
-                clip: true
-                model: addWidgetSearchModel
-                delegate: Rectangle {
-                    id: addWDelegateRoot
-                    required property string name
-
-                    width: parent ? parent.width : 0
-                    height: 40
-                    color: "transparent"
-
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.margins: 8
-                        text: addWDelegateRoot.name
-                        color: "white"
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            pinnedTiles.addWidgetTile({
-                                "name": addWDelegateRoot.name
-                            });
-                            addTilePopup.close();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    GridLayout {
-        id: pinnedGrid
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.margins: 20
-        anchors.topMargin: 60
-        columns: 4
-        rowSpacing: 8
-        columnSpacing: 8
-
-        Repeater {
-            model: pinnedTiles
-            delegate: Item {
-                id: tileRoot
-                required property int index
-                required property string name
-                required property int colSpan
-                required property int rowSpan
-                required property var payload
-                required property url qmlSource
-
-                Layout.columnSpan: colSpan
-                Layout.rowSpan: rowSpan
-                Layout.preferredWidth: 150 * colSpan + 8 * (colSpan - 1)
-                Layout.preferredHeight: 150 * rowSpan + 8 * (rowSpan - 1)
-
-                Loader {
-                    anchors.fill: parent
-                    onStatusChanged: if (status === Loader.Error)
-                        console.log("Loader error:", sourceComponent)
-                    Component.onCompleted: {
-                        setSource(tileRoot.qmlSource, {
-                            "name": tileRoot.name,
-                            "payload": tileRoot.payload,
-                            "colSpan": tileRoot.colSpan,
-                            "rowSpan": tileRoot.rowSpan
-                        });
-                    }
-                }
+            Rectangle {
+                id: gridBackground
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.topMargin: 60
+                color: "transparent"
 
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.RightButton
-                    onClicked: tileMenu.popup()
+                    onClicked: emptySpaceMenu.popup()
                 }
 
                 Menu {
-                    id: tileMenu
+                    id: emptySpaceMenu
+
                     MenuItem {
-                        text: "Resize"
+                        text: "Add tile"
                         onTriggered: {
-                            var shapes = [[1, 1], [2, 1], [1, 2], [2, 2]];
-                            var cur = 0;
-                            for (var i = 0; i < shapes.length; i++) {
-                                if (shapes[i][0] === tileRoot.colSpan && shapes[i][1] === tileRoot.rowSpan) {
-                                    cur = i;
-                                    break;
-                                }
-                            }
-                            var next = shapes[(cur + 1) % shapes.length];
-                            pinnedTiles.resizeTile(tileRoot.index, next[0], next[1]);
+                            addTileSearchField.text = "";
+                            addTilePopup.open();
+                            addTileSearchField.forceActiveFocus();
                         }
                     }
+
                     MenuItem {
-                        text: "Remove"
-                        onTriggered: pinnedTiles.removeTile(tileRoot.index)
+                        text: "Add Widget"
+                        onTriggered: {
+                            addWidgetSearchField.text = "";
+                            addWidgetPopup.open();
+                            addWidgetSearchField.forceActiveFocus();
+                        }
+                    }
+                }
+            }
+
+            Popup {
+                id: addTilePopup
+                anchors.centerIn: parent
+                width: 400
+                height: 360
+                modal: true
+                focus: true
+                padding: 12
+
+                background: Rectangle {
+                    color: "#2d2d2d"
+                    radius: 6
+                    border.color: "#3a3a3a"
+                }
+
+                Column {
+                    anchors.fill: parent
+                    spacing: 8
+
+                    TextField {
+                        id: addTileSearchField
+                        width: parent.width
+                        placeholderText: "Search apps to add..."
+                        onTextChanged: addTileSearchModel.setFilterFixedString(text)
+                        Keys.onEscapePressed: addTilePopup.close()
+                    }
+
+                    ListView {
+                        width: parent.width
+                        height: parent.height - 40
+                        clip: true
+                        model: addTileSearchModel
+                        delegate: Rectangle {
+                            id: addDelegateRoot
+                            required property string name
+                            required property string exec_
+                            required property string icon
+
+                            width: parent ? parent.width : 0
+                            height: 40
+                            color: "transparent"
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.margins: 8
+                                text: addDelegateRoot.name
+                                color: "white"
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    pinnedTiles.addAppTile({
+                                        "name": addDelegateRoot.name,
+                                        "exec": addDelegateRoot.exec_,
+                                        "icon": addDelegateRoot.icon
+                                    });
+                                    addTilePopup.close();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Popup {
+                id: addWidgetPopup
+                anchors.centerIn: parent
+                width: 400
+                height: 360
+                modal: true
+                focus: true
+                padding: 12
+
+                background: Rectangle {
+                    color: "#2d2d2d"
+                    radius: 6
+                    border.color: "#3a3a3a"
+                }
+
+                Column {
+                    anchors.fill: parent
+                    spacing: 8
+
+                    TextField {
+                        id: addWidgetSearchField
+                        width: parent.width
+                        placeholderText: "Search apps to add..."
+                        onTextChanged: addTileSearchModel.setFilterFixedString(text)
+                        Keys.onEscapePressed: addTilePopup.close()
+                    }
+
+                    ListView {
+                        width: parent.width
+                        height: parent.height - 40
+                        clip: true
+                        model: addWidgetSearchModel
+                        delegate: Rectangle {
+                            id: addWDelegateRoot
+                            required property string name
+
+                            width: parent ? parent.width : 0
+                            height: 40
+                            color: "transparent"
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.margins: 8
+                                text: addWDelegateRoot.name
+                                color: "white"
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    pinnedTiles.addWidgetTile({
+                                        "name": addWDelegateRoot.name
+                                    });
+                                    addTilePopup.close();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            GridLayout {
+                id: pinnedGrid
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.margins: 20
+                anchors.topMargin: 60
+                columns: 4
+                rowSpacing: 8
+                columnSpacing: 8
+
+                Repeater {
+                    model: pinnedTiles
+                    delegate: Item {
+                        id: tileRoot
+                        required property int index
+                        required property string name
+                        required property int colSpan
+                        required property int rowSpan
+                        required property var payload
+                        required property url qmlSource
+
+                        Layout.columnSpan: colSpan
+                        Layout.rowSpan: rowSpan
+                        Layout.preferredWidth: 150 * colSpan + 8 * (colSpan - 1)
+                        Layout.preferredHeight: 150 * rowSpan + 8 * (rowSpan - 1)
+
+                        Loader {
+                            anchors.fill: parent
+                            onStatusChanged: if (status === Loader.Error)
+                                console.log("Loader error:", sourceComponent)
+                            Component.onCompleted: {
+                                setSource(tileRoot.qmlSource, {
+                                    "name": tileRoot.name,
+                                    "payload": tileRoot.payload,
+                                    "colSpan": tileRoot.colSpan,
+                                    "rowSpan": tileRoot.rowSpan
+                                });
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.RightButton
+                            onClicked: tileMenu.popup()
+                        }
+
+                        Menu {
+                            id: tileMenu
+                            MenuItem {
+                                text: "Resize"
+                                onTriggered: {
+                                    var shapes = [[1, 1], [2, 1], [1, 2], [2, 2]];
+                                    var cur = 0;
+                                    for (var i = 0; i < shapes.length; i++) {
+                                        if (shapes[i][0] === tileRoot.colSpan && shapes[i][1] === tileRoot.rowSpan) {
+                                            cur = i;
+                                            break;
+                                        }
+                                    }
+                                    var next = shapes[(cur + 1) % shapes.length];
+                                    pinnedTiles.resizeTile(tileRoot.index, next[0], next[1]);
+                                }
+                            }
+                            MenuItem {
+                                text: "Remove"
+                                onTriggered: pinnedTiles.removeTile(tileRoot.index)
+                            }
+                        }
                     }
                 }
             }
