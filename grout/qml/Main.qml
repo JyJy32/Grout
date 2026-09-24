@@ -29,7 +29,7 @@ Window {
                 Text {
                     id: clockText
                     color: palette.text
-                    font.pixelSize: 20
+                    font.pixelSize: 40
                     text: Qt.formatTime(new Date(), "hh:mm")
 
                     Timer {
@@ -44,13 +44,31 @@ Window {
                     id: searchField
                     Layout.fillWidth: true
                     placeholderText: "search ..."
+                    placeholderTextColor: palette.accent
                     focus: true
-                    Keys.onEscapePressed: root.setVisible(false)
+                    font.pixelSize: 32
+                    background: Rectangle {
+                        color: palette.background
+                    }
+                    color: palette.accent
                     onTextChanged: {
                         searchModel.setFilterFixedString(text);
                         resultsPopup.open();
                         if (text.length === 0)
                             resultsPopup.close();
+                    }
+                    Keys.onEscapePressed: root.setVisible(false)
+                    Keys.onDownPressed: {
+                        if (resultsList.count > 0)
+                            resultsList.forceActiveFocus();
+                    }
+                    Keys.onReturnPressed: {
+                        if (resultsList.currentItem) {
+                            launcher.launch(resultsList.currentItem.exec_);
+                            root.setVisible(false);
+                            resultsPopup.close();
+                            searchField.text = "";
+                        }
                     }
                 }
 
@@ -120,7 +138,25 @@ Window {
                         model: searchModel
                         clip: true
                         implicitHeight: Math.min(contentHeight, 300)
+                        keyNavigationEnabled: true
+                        Keys.onEscapePressed: searchField.forceActiveFocus()
+                        Keys.onUpPressed: {
+                            if (currentIndex === 0)
+                                searchField.forceActiveFocus();
+                            else
+                                currentIndex--;
+                        }
+                        Keys.onReturnPressed: {
+                            if (currentItem) {
+                                launcher.launch(currentItem.exec_);
+                                root.setVisible(false);
+                                resultsPopup.close();
+                                searchField.text = "";
+                            }
+                        }
                         delegate: Rectangle {
+                            required property string name
+                            required property string exec_
                             width: resultsList.width
                             height: 44
                             color: ListView.isCurrentItem ? palette.surfaceBorder : "transparent"
@@ -133,7 +169,12 @@ Window {
                             }
                             MouseArea {
                                 anchors.fill: parent
-                                onClicked: console.log("launch: ", exec_)
+                                onClicked: {
+                                    launcher.launch(exec_);
+                                    root.setVisible(false);
+                                    resultsPopup.close();
+                                    searchField.text = "";
+                                }
                             }
                         }
                     }

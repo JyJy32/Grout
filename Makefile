@@ -8,7 +8,7 @@ run:
 	python -m grout.main
 
 dev:
-	watchexec -e py,qml -r -- $(PYTHON) -m grout.main
+	watchexec -e py,qml,json -r -- $(PYTHON) -m grout.main
 
 freeze:
 	pip freeze > requirements.txt
