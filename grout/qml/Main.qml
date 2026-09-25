@@ -379,6 +379,7 @@ Window {
                         Layout.preferredHeight: 150 * rowSpan + 8 * (rowSpan - 1)
 
                         Loader {
+                            id: tileLoader
                             anchors.fill: parent
                             onStatusChanged: if (status === Loader.Error)
                                 console.log("Loader error:", sourceComponent)
@@ -388,6 +389,20 @@ Window {
                                     "payload": tileRoot.payload,
                                     "colSpan": tileRoot.colSpan,
                                     "rowSpan": tileRoot.rowSpan
+                                });
+                            }
+                            onLoaded: {
+                                item.name = Qt.binding(function () {
+                                    return tileRoot.name;
+                                });
+                                item.payload = Qt.binding(function () {
+                                    return tileRoot.payload;
+                                });
+                                item.colSpan = Qt.binding(function () {
+                                    return tileRoot.colSpan;
+                                });
+                                item.rowSpan = Qt.binding(function () {
+                                    return tileRoot.rowSpan;
                                 });
                             }
                         }
@@ -413,6 +428,20 @@ Window {
                                     }
                                     var next = shapes[(cur + 1) % shapes.length];
                                     pinnedTiles.resizeTile(tileRoot.index, next[0], next[1]);
+                                }
+                            }
+                            Menu {
+                                id: colourMenu
+                                title: "Change colour"
+
+                                Instantiator {
+                                    model: Object.keys(themeColors)
+                                    MenuItem {
+                                        text: modelData
+                                        onTriggered: pinnedTiles.setTileColour(tileRoot.index, themeColors[modelData])
+                                    }
+                                    onObjectAdded: (index, object) => colourMenu.insertItem(index, object)
+                                    onObjectRemoved: (index, object) => colourMenu.removeItem(object)
                                 }
                             }
                             MenuItem {

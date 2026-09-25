@@ -172,6 +172,15 @@ class TileListModel(QAbstractListModel):
         self.endInsertRows()
         self._notify_change()
 
+    @Slot(int, str)
+    def setTileColour(self, row: int, color_hex: str):
+        if not (0 <= row < len(self._tiles)):
+            return
+        self._tiles[row]["payload"]["color"] = color_hex
+        idx = self.index(row, 0)
+        self.dataChanged.emit(idx, idx, [self.PayloadRole])
+        self._notify_change()
+
 class WidgetListModel(QAbstractListModel):
     NameRole = Qt.ItemDataRole.UserRole + 1
     PathRole = Qt.ItemDataRole.UserRole + 2
