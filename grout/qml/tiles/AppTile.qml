@@ -6,7 +6,7 @@ Rectangle {
     property int colSpan
     property int rowSpan
 
-    color: palette.surface
+    color: payload.color
     radius: 4
 
     Text {
@@ -17,6 +17,8 @@ Rectangle {
         width: parent.width - 20
         wrapMode: Text.WordWrap
         text: name
+        style: Text.Outline
+        styleColor: palette.surfaceBorder
         color: palette.text
         font.pixelSize: 20
     }

@@ -40,7 +40,7 @@ def save_tiles(tiles: list[dict]) -> None:
 def load_config() -> Config:
     path = get_config_dir() / "config.json"
     if not path.is_file():
-        # TODO: set up default config file
+        store_default_config()
         return Config()
     try:
         with path.open("r") as f:
@@ -55,3 +55,7 @@ def save_config(cfg: Config) -> None:
     with tmp.open("w") as f:
         f.write(cfg.serialize())
     tmp.replace(path)
+
+def store_default_config() -> None:
+    save_config(Config())
+

@@ -4,6 +4,9 @@ import typing
 import PySide6.QtCore
 from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, QUrl, Qt, QObject, Slot
 
+from grout import palette
+from grout.iconprovider import compute_tile_color
+
 
 class AppListModel(QAbstractListModel):
     NameRole = Qt.ItemDataRole.UserRole + 1
@@ -48,10 +51,13 @@ class TileListModel(QAbstractListModel):
     PayloadRole = Qt.ItemDataRole.UserRole + 5
     QmlSourceRole = Qt.ItemDataRole.UserRole + 6
 
-    def __init__(self, tiles, app_tile_qml, widgets_registry, on_change=None, parent: PySide6.QtCore.QObject | None = None) -> None:
+    # TODO: type hint the params
+    def __init__(self, tiles, app_tile_qml, widgets_registry, palette, on_change=None, parent: PySide6.QtCore.QObject | None = None) -> None:
         super().__init__(parent)
         self._app_tile_qml = app_tile_qml
         self._widgets_registry = widgets_registry  # {widget_name: Path to Widget.qml}
+        self._palette = palette
+        self._theme_colors = palette["colors"]
         self._on_change = on_change
         self._tiles = [self._resolve(t) for t in tiles]
 
@@ -59,6 +65,9 @@ class TileListModel(QAbstractListModel):
         """attach a runtime qmlSource to a persisted tile dict."""
         resolved = dict(tile)
         if resolved["type"] == "app":
+            # color check for old stuff:
+            if not "color" in  resolved["payload"].keys():
+                resolved["payload"]["color"] = compute_tile_color(resolved["name"], self._theme_colors, self._palette["surface"])
             resolved["qmlSource"] = self._app_tile_qml
         else:
             widget_path = self._widgets_registry.get(resolved.get("name"))
@@ -132,12 +141,13 @@ class TileListModel(QAbstractListModel):
     def addAppTile(self, app):
         if hasattr(app, "toVariant"):
             app = app.toVariant()
+        color = compute_tile_color(app.get("icon", ""), self._theme_colors, fallback=self._palette["surface"])
         tile = self._resolve({
             "type": "app",
             "name": app["name"],
             "colSpan": 1,
             "rowSpan": 1,
-            "payload": {"exec": app["exec"], "icon": app.get("icon", "")},
+            "payload": {"exec": app["exec"], "icon": app.get("icon", ""), "color": color},
         })
         row = len(self._tiles)
         self.beginInsertRows(QModelIndex(), row, row)

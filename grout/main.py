@@ -9,7 +9,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from grout.apps import get_desktop_entries
 from grout.config import load_config, load_tiles, save_tiles
 from grout.daemon import ToggleServer
-from grout.iconprovider import IconProvider, detect_icon_theme
+from grout.iconprovider import IconProvider, compute_tile_color, detect_icon_theme
 from grout.models import AppListModel, TileListModel, WidgetListModel
 from grout.launcher import Launcher
 from grout.palette import get_user_palette_path, load_palette
@@ -70,14 +70,14 @@ def main():
             "name": a["name"],
             "colSpan": 1,
             "rowSpan": 1,
-            "payload": {"exec": a["exec"], "icon": a["icon"]},
+            "payload": {"exec": a["exec"], "icon": a["icon"], "color": compute_tile_color(a["icon"], palette["colors"], fallback=palette["surface"])},
             "qmlSource": app_tile_qml,
         }
         for a in apps[:6]
     ]
 
     pinned_tiles = load_tiles(default_tiles)
-    pinned_model = TileListModel(pinned_tiles, app_tile_qml=app_tile_qml, widgets_registry=widgets_registry, on_change=save_tiles)
+    pinned_model = TileListModel(pinned_tiles, app_tile_qml=app_tile_qml, widgets_registry=widgets_registry, palette=palette, on_change=save_tiles)
 
     engine.rootContext().setContextProperty("pinnedTiles", pinned_model)
 
