@@ -11,7 +11,7 @@ class Config():
             self.current_palette = dump["current_palette"]
 
     def serialize(self) -> str:
-        return f"{{ current_palette: {self.current_palette} }}"
+        return f"{{ \"current_palette\": \"{self.current_palette}\" }}"
 
 def get_config_dir() -> Path:
     config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))

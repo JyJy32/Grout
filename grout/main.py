@@ -33,7 +33,9 @@ def main():
     palette_path = get_user_palette_path(config)
     palette = load_palette(palette_path)
     engine.rootContext().setContextProperty("palette", palette)
-    engine.rootContext().setContextProperty("themeColors", palette["colors"])
+    select_colors = palette["colors"]
+    select_colors["default"] = palette["surface"]
+    engine.rootContext().setContextProperty("themeColors", select_colors)
 
     apps = get_desktop_entries()
     app_model = AppListModel(apps)
