@@ -44,7 +44,7 @@ def load_config() -> Config:
         return Config()
     try:
         with path.open("r") as f:
-            return json.load(f)
+            return Config(json.load(f))
     except (json.JSONDecodeError, OSError):
         print(f"grout: failed to read {path}")
         return Config()
