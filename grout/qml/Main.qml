@@ -64,7 +64,9 @@ Window {
                     }
                     Keys.onReturnPressed: {
                         if (resultsList.currentItem) {
-                            launcher.launch(resultsList.currentItem.exec_);
+                            print("resultlist launch");
+                            print(resultsList.currentItem.terminal);
+                            launcher.launch(resultsList.currentItem.exec_, resultsList.currentItem.terminal);
                             root.setVisible(false);
                             resultsPopup.close();
                             searchField.text = "";
@@ -148,7 +150,7 @@ Window {
                         }
                         Keys.onReturnPressed: {
                             if (currentItem) {
-                                launcher.launch(currentItem.exec_);
+                                launcher.launch(currentItem.exec_, currentItem.terminal);
                                 root.setVisible(false);
                                 resultsPopup.close();
                                 searchField.text = "";
@@ -156,6 +158,7 @@ Window {
                         }
                         delegate: Rectangle {
                             required property string name
+                            required property bool terminal
                             required property string exec_
                             width: resultsList.width
                             height: 44
@@ -170,7 +173,7 @@ Window {
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: {
-                                    launcher.launch(exec_);
+                                    launcher.launch(exec_, terminal);
                                     root.setVisible(false);
                                     resultsPopup.close();
                                     searchField.text = "";

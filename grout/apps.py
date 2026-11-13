@@ -30,6 +30,7 @@ def get_desktop_entries() -> list[dict[str, str]]:
                 "exec": entry.getExec(),
                 "icon": entry.getIcon(),
                 "comment": entry.getComment(),
+                "terminal": entry.getTerminal(),
             })
     apps.sort(key=lambda a: a["name"].lower())
     return apps

@@ -13,6 +13,7 @@ class AppListModel(QAbstractListModel):
     ExecRole = Qt.ItemDataRole.UserRole + 2
     IconRole = Qt.ItemDataRole.UserRole + 3
     CommentRole = Qt.ItemDataRole.UserRole + 4
+    TerminalRole = Qt.ItemDataRole.UserRole + 5
     def __init__(self, apps, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._apps = apps
@@ -32,6 +33,8 @@ class AppListModel(QAbstractListModel):
             return app["icon"]
         if role == self.CommentRole:
             return app["comment"]
+        if role == self.TerminalRole:
+            return app.get("terminal", False)
 
         return None
 
@@ -41,6 +44,7 @@ class AppListModel(QAbstractListModel):
             self.ExecRole: QByteArray(b"exec_"),
             self.IconRole: QByteArray(b"icon"),
             self.CommentRole: QByteArray(b"comment"),
+            self.TerminalRole: QByteArray(b"terminal")
         }
 
 class TileListModel(QAbstractListModel):
@@ -147,7 +151,7 @@ class TileListModel(QAbstractListModel):
             "name": app["name"],
             "colSpan": 1,
             "rowSpan": 1,
-            "payload": {"exec": app["exec"], "icon": app.get("icon", ""), "color": color},
+            "payload": {"exec": app["exec"], "icon": app.get("icon", ""), "color": color, "terminal": app.get("terminal", False)},
         })
         row = len(self._tiles)
         self.beginInsertRows(QModelIndex(), row, row)

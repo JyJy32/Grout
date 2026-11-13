@@ -49,7 +49,7 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            launcher.launch(payload.exec);
+            launcher.launch(payload.exec, payload.terminal);
             mainWindow.setVisible(false);
         }
         onPressed: parent.scale = 0.96

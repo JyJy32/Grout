@@ -13,9 +13,14 @@ def clean_exec(exec_string: str) -> list[str]:
 
 
 class Launcher(QObject):
-    @Slot(str)
-    def launch(self, exec_string: str):
+    @Slot(str, bool)
+    def launch(self, exec_string: str, is_terminal: bool = False):
+        print(exec_string)
+        # TODO: get terminal emulator from config
+        if is_terminal:
+            exec_string = "alacritty -e " + exec_string
         args = clean_exec(exec_string)
+        print(f"grout launching app: {args}")
         if not args:
             return
         try:

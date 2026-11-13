@@ -17,6 +17,7 @@ from grout.system import SystemActions
 from grout.widgets import discover_widgets
 
 def main():
+    print("starting grout")
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
     config = load_config()
@@ -106,6 +107,7 @@ def main():
             window.raise_()
 
     server.toggle_requested.connect(handle_toggle)
+    print("grout loaded")
 
     sys.exit(app.exec())
 
