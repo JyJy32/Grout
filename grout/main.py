@@ -6,6 +6,7 @@ from PySide6.QtCore import QSortFilterProxyModel, QUrl, Qt
 from PySide6.QtGui import QGuiApplication, QIcon, QWindow
 from PySide6.QtQml import QQmlApplicationEngine
 
+from grout import settings
 from grout.apps import get_desktop_entries
 from grout.config import load_config, load_tiles, save_tiles
 from grout.daemon import ToggleServer
@@ -13,6 +14,7 @@ from grout.iconprovider import IconProvider, compute_tile_color, detect_icon_the
 from grout.models import AppListModel, TileListModel, WidgetListModel
 from grout.launcher import Launcher
 from grout.palette import get_user_palette_path, load_palette
+from grout.settings import SettingsController
 from grout.system import SystemActions
 from grout.widgets import discover_widgets
 
@@ -25,7 +27,7 @@ def main():
     icon_provider = IconProvider()
     engine.addImageProvider("icons", icon_provider)
 
-    launcher = Launcher()
+    launcher = Launcher(config)
     engine.rootContext().setContextProperty("launcher", launcher)
 
     system_actions = SystemActions()
@@ -65,6 +67,7 @@ def main():
     add_widget_proxy.setDynamicSortFilter(True)
     engine.rootContext().setContextProperty("addWidgetSearchModel", add_widget_proxy)
 
+
     app_tile_qml = QUrl.fromLocalFile(
         str(Path(__file__).parent / "qml" / "tiles" / "AppTile.qml")
     )
@@ -85,6 +88,8 @@ def main():
 
     engine.rootContext().setContextProperty("pinnedTiles", pinned_model)
 
+    settings = SettingsController(config, palette_path.parent)
+    engine.rootContext().setContextProperty("appSettings", settings)
 
     qml_path = Path(__file__).parent / "qml" / "Main.qml"
     engine.load(str(qml_path))

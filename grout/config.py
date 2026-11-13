@@ -4,14 +4,17 @@ from pathlib import Path
 
 class Config():
     current_palette: str = ""
+    terminal: str = ""
     def __init__(self, dump: dict | None = None) -> None:
-        if not dump:
-            self.current_palette = "catppuccin-mocha"
-        else:
-            self.current_palette = dump["current_palette"]
+        dump = dump or {}
+        self.current_palette = dump.get("current_palette") or "catppuccin-mocha"
+        self.terminal = dump.get("terminal") or "xterm"
 
     def serialize(self) -> str:
-        return f"{{ \"current_palette\": \"{self.current_palette}\" }}"
+        return json.dumps(
+            {"current_palette": self.current_palette, "terminal": self.terminal},
+            indent=2,
+        )
 
 def get_config_dir() -> Path:
     config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))

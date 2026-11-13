@@ -114,7 +114,7 @@ Window {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: console.log("settings clicked")
+                        onClicked: settingsPopup.open()
                     }
                 }
 
@@ -456,5 +456,8 @@ Window {
                 }
             }
         }
+    }
+    SettingsPopup {
+        id: settingsPopup
     }
 }
